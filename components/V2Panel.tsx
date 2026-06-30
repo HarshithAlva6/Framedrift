@@ -30,7 +30,7 @@ export default function V2Panel({
     <div className="rounded-xl border border-white/8 bg-white/[0.015] p-6">
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <h2 className="text-xl font-bold text-white">What Claude thinks to try next</h2>
+          <h2 className="text-xl font-bold text-white">What the AI thinks to try next</h2>
           <p className="mt-0.5 text-sm text-white/30">Built from patterns in the winners, then run through the same simulation to see if it holds up</p>
         </div>
         {/* Score lift badges */}
@@ -84,7 +84,7 @@ export default function V2Panel({
       </div>
 
       <div className="rounded-lg border border-white/8 bg-white/[0.02] p-4">
-        <h3 className="mb-2 text-xs font-semibold uppercase tracking-widest text-white/25">Claude's thinking</h3>
+        <h3 className="mb-2 text-xs font-semibold uppercase tracking-widest text-white/25">The AI's thinking</h3>
         <p className="text-sm leading-relaxed text-white/55">{v2Rationale}</p>
       </div>
     </div>

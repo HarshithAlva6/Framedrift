@@ -81,7 +81,7 @@ export const variants: Variant[] = [
     bodyPoints: [
       'Covers models, frameworks, runtimes, and orchestration tools',
       'Tracks LangChain, LlamaIndex, LiveKit, Bun, OpenAI SDK, HuggingFace, and more',
-      'A shared log of breaking changes, with Claude to help figure out what actually matters',
+      'A shared log of breaking changes, with AI to help figure out what actually matters',
     ],
     targetPersona: 'both',
   },

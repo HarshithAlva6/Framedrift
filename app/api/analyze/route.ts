@@ -1,6 +1,6 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const client = new Anthropic();
+const client = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? '');
 
 export async function POST(request: Request) {
   try {
@@ -24,6 +24,13 @@ Please:
 3. Generate a new V2 variant that synthesizes the best-performing elements
 4. Explain specifically what changed in V2 and the hypothesis behind each change
 
+When writing the V2 variant (name, angle, headline, subheadline, cta, bodyPoints), match the voice of the existing 5 variants exactly:
+- Concrete and specific, not abstract. "Stop losing days to upstream surprises" not "Optimize your workflow efficiency."
+- Plain conversational English, like a developer explaining something to another developer.
+- No em-dashes.
+- Do NOT use these words or their variants: proactive, predictive, intelligent, intelligence, seamless, unlock, empower, revolutionize, leverage, robust, cutting-edge, supercharge, transform, elevate, streamline, synergy, holistic, ecosystem (unless referring to the actual AI/ML tooling ecosystem), game-changing, next-generation.
+- The headline should name a real, specific problem or outcome, not a vague capability.
+
 Format your response as JSON with this structure:
 {
   "winnerByPersona": {
@@ -45,15 +52,14 @@ Format your response as JSON with this structure:
 }
 `;
 
-    const response = await client.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 2000,
-      messages: [{ role: 'user', content: prompt }],
+    const model = client.getGenerativeModel({
+      model: 'gemini-2.5-flash',
+      generationConfig: { responseMimeType: 'application/json' },
     });
 
-    const text = response.content[0].type === 'text' ? response.content[0].text : '';
-    const cleaned = text.replace(/```json|```/g, '').trim();
-    const result = JSON.parse(cleaned);
+    const response = await model.generateContent(prompt);
+    const text = response.response.text();
+    const result = JSON.parse(text);
 
     return Response.json(result);
   } catch (err) {

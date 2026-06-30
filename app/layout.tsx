@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'FrameDrift — Landing Page Optimizer',
-  description: 'Self-improving landing page system powered by simulated user behavior and Claude AI reasoning.',
+  description: 'Self-improving landing page system powered by simulated user behavior and AI reasoning.',
 };
 
 export default function RootLayout({

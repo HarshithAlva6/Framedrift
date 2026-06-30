@@ -21,7 +21,7 @@ export default function WinnerPanel({ winnerByPersona, keyInsights, variants }: 
     <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-6">
       <div className="mb-6">
         <h2 className="text-xl font-bold text-white">What the data says</h2>
-        <p className="mt-0.5 text-sm text-white/35">Claude read through the behavior signals and explained what drove the gap</p>
+        <p className="mt-0.5 text-sm text-white/35">The AI read through the behavior signals and explained what drove the gap</p>
       </div>
 
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -44,7 +44,7 @@ export default function WinnerPanel({ winnerByPersona, keyInsights, variants }: 
       </div>
 
       <div className="rounded-lg border border-white/10 bg-white/5 p-4">
-        <h3 className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/30">Patterns Claude noticed</h3>
+        <h3 className="mb-3 text-xs font-semibold uppercase tracking-widest text-white/30">Patterns the AI noticed</h3>
         <ul className="flex flex-col gap-2">
           {keyInsights.map((insight, i) => (
             <li key={i} className="flex items-start gap-2 text-sm text-white/70">

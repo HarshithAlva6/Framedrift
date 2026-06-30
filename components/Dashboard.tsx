@@ -16,7 +16,7 @@ import V2Panel from './V2Panel';
 type Phase = 'idle' | 'simulating' | 'simulated' | 'analyzing' | 'complete';
 type DataMode = 'live' | 'mixed' | 'simulated';
 
-type ClaudeAnalysis = {
+type AIAnalysis = {
   winnerByPersona: {
     transitioning: { variantId: string; reasoning: string };
     founding: { variantId: string; reasoning: string };
@@ -71,10 +71,10 @@ export default function Dashboard() {
   const [simScores, setSimScores] = useState<VariantScore[]>([]);
   const [hasSimData, setHasSimData] = useState(false);
 
-  // V2 + Claude
+  // V2 + AI analysis
   const [v2Summaries, setV2Summaries] = useState<BehaviorSummary[]>([]);
   const [v2Scores, setV2Scores] = useState<VariantScore[]>([]);
-  const [analysis, setAnalysis] = useState<ClaudeAnalysis | null>(null);
+  const [analysis, setAnalysis] = useState<AIAnalysis | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('A');
 
@@ -223,7 +223,7 @@ export default function Dashboard() {
               </span>
             </div>
             {phase === 'simulating' && <span className="text-xs font-medium text-amber-500">Simulating...</span>}
-            {phase === 'analyzing' && <span className="text-xs font-medium text-purple-400">Asking Claude...</span>}
+            {phase === 'analyzing' && <span className="text-xs font-medium text-purple-400">Asking AI...</span>}
           </div>
         </div>
       </header>
@@ -366,7 +366,7 @@ export default function Dashboard() {
               className="flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition-all disabled:cursor-not-allowed disabled:opacity-40"
               style={{ background: '#c07830' }}
             >
-              {phase === 'analyzing' ? <><Spinner /> Asking Claude...</> : 'Ask Claude what won'}
+              {phase === 'analyzing' ? <><Spinner /> Asking AI...</> : 'Ask AI what won'}
             </button>
           )}
         </section>
