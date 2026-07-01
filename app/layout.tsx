@@ -21,7 +21,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'FrameDrift — Landing Page Optimizer',
+  title: 'FrameDrift - Landing Page Optimizer',
   description: 'Self-improving landing page system powered by simulated user behavior and AI reasoning.',
 };
 

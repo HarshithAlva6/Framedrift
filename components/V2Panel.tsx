@@ -63,7 +63,7 @@ export default function V2Panel({
         <div className="rounded-lg border p-4" style={{borderColor:'rgba(192,120,48,0.3)', background:'rgba(192,120,48,0.04)'}}>
           <div className="mb-3 flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-widest" style={{color:'#c07830'}}>V2 · Both</span>
-            {v2TransScore && (
+            {v2TransScore != null && v2FoundScore != null && (
               <span className="text-xs font-mono font-bold" style={{color:'#d4944e'}}>{v2TransScore} / {v2FoundScore}</span>
             )}
           </div>

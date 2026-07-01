@@ -109,7 +109,7 @@ export default function Dashboard() {
       if (enough) {
         setLiveSummaries(data.summaries ?? []);
         setLiveScores(data.scores ?? []);
-        if (phase === 'idle') setPhase('simulated');
+        setPhase((prev) => prev === 'idle' ? 'simulated' : prev);
       }
     } catch { }
   }
@@ -215,7 +215,7 @@ export default function Dashboard() {
     ? activeScores.find((s) => s.variantId === winnerFoundingId && s.persona === 'founding')?.compositeScore
     : undefined;
 
-  const canSimulate = dataMode === 'simulated' || dataMode === 'mixed';
+  const canSimulate = true;
   const modeLabel = dataMode === 'live' ? 'real visitors' : dataMode === 'mixed' ? 'real + simulated visitors' : 'simulated visitors';
 
   // The weakest non-winning variant is the one V2 replaces — reallocating
@@ -314,16 +314,14 @@ export default function Dashboard() {
             <ModeButton
               label="Real"
               active={dataMode === 'live'}
-              disabled={!hasLiveData}
-              disabledHint="No sessions yet"
+              disabled={false}
               color="emerald"
               onClick={() => switchMode('live')}
             />
             <ModeButton
               label="Mixed"
               active={dataMode === 'mixed'}
-              disabled={!hasLiveData && !hasSimData}
-              disabledHint="Need data first"
+              disabled={false}
               color="amber"
               onClick={() => switchMode('mixed')}
             />
