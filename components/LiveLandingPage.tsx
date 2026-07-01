@@ -149,10 +149,10 @@ function LayoutA({ variant, onCta }: { variant: Variant; onCta: () => void }) {
     <>
       <section className="pb-16 pt-20">
         <PersonaBadge persona={variant.targetPersona} />
-        <h1 className="mb-5 max-w-2xl text-4xl font-bold leading-tight tracking-tight md:text-5xl">
+        <h1 className="mb-5 text-4xl font-bold leading-tight tracking-tight md:text-5xl font-display">
           {variant.headline}
         </h1>
-        <p className="mb-10 max-w-xl text-lg leading-relaxed text-white/45">{variant.subheadline}</p>
+        <p className="mb-10 text-lg leading-relaxed text-white/45">{variant.subheadline}</p>
         <div className="mb-10 max-w-xl rounded-lg border border-white/8 bg-black/40 p-5 font-mono text-sm">
           <div className="mb-2 text-white/25">$ npm run build</div>
           <div className="mb-1 text-red-400/80">✖  Cannot find module &apos;langchain/vectorstores/chroma&apos;</div>
@@ -189,10 +189,10 @@ function LayoutB({ variant, onCta }: { variant: Variant; onCta: () => void }) {
       </section>
       <section className="py-16">
         <PersonaBadge persona={variant.targetPersona} />
-        <h1 className="mb-5 max-w-2xl text-4xl font-bold leading-tight tracking-tight md:text-5xl">
+        <h1 className="mb-5 text-4xl font-bold leading-tight tracking-tight md:text-5xl font-display">
           {variant.headline}
         </h1>
-        <p className="mb-10 max-w-xl text-lg leading-relaxed text-white/45">{variant.subheadline}</p>
+        <p className="mb-10 text-lg leading-relaxed text-white/45">{variant.subheadline}</p>
         <Cta label={variant.cta} onClick={onCta} />
       </section>
       <FeatureGrid points={variant.bodyPoints} />
@@ -211,10 +211,10 @@ function LayoutC({ variant, onCta }: { variant: Variant; onCta: () => void }) {
     <>
       <section className="py-16">
         <PersonaBadge persona={variant.targetPersona} />
-        <h1 className="mb-5 max-w-2xl text-4xl font-bold leading-tight tracking-tight md:text-5xl">
+        <h1 className="mb-5 text-4xl font-bold leading-tight tracking-tight md:text-5xl font-display">
           {variant.headline}
         </h1>
-        <p className="mb-10 max-w-xl text-lg leading-relaxed text-white/45">{variant.subheadline}</p>
+        <p className="mb-10 text-lg leading-relaxed text-white/45">{variant.subheadline}</p>
         <div className="mb-10 max-w-md overflow-hidden rounded-lg border border-white/8 bg-white/[0.02]">
           <div className="flex items-center justify-between border-b border-white/6 px-4 py-3">
             <span className="text-xs font-medium text-white/40">This week in your stack</span>
@@ -248,10 +248,10 @@ function LayoutD({ variant, onCta }: { variant: Variant; onCta: () => void }) {
     <>
       <section className="py-16">
         <PersonaBadge persona={variant.targetPersona} />
-        <h1 className="mb-5 max-w-2xl text-4xl font-bold leading-tight tracking-tight md:text-5xl">
+        <h1 className="mb-5 text-4xl font-bold leading-tight tracking-tight md:text-5xl font-display">
           {variant.headline}
         </h1>
-        <p className="mb-10 max-w-xl text-lg leading-relaxed text-white/45">{variant.subheadline}</p>
+        <p className="mb-10 text-lg leading-relaxed text-white/45">{variant.subheadline}</p>
         <div className="mb-10 max-w-lg overflow-hidden rounded-lg border border-white/8">
           <div className="grid grid-cols-3 border-b border-white/8 bg-white/[0.02]">
             <div className="px-4 py-2.5 text-xs text-white/20" />
@@ -288,10 +288,10 @@ function LayoutE({ variant, onCta }: { variant: Variant; onCta: () => void }) {
           <span className="rounded border border-white/5 bg-white/[0.01] px-3 py-1.5 font-mono text-sm text-white/15">+more</span>
         </div>
         <PersonaBadge persona={variant.targetPersona} />
-        <h1 className="mb-5 max-w-2xl text-4xl font-bold leading-tight tracking-tight md:text-5xl">
+        <h1 className="mb-5 text-4xl font-bold leading-tight tracking-tight md:text-5xl font-display">
           {variant.headline}
         </h1>
-        <p className="mb-10 max-w-xl text-lg leading-relaxed text-white/45">{variant.subheadline}</p>
+        <p className="mb-10 text-lg leading-relaxed text-white/45">{variant.subheadline}</p>
         <Cta label={variant.cta} onClick={onCta} />
       </section>
       <FeatureGrid points={variant.bodyPoints} />

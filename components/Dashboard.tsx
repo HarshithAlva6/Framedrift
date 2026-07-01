@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { variants } from '@/lib/variants';
+import { variants as baseVariants } from '@/lib/variants';
 import type { Variant } from '@/lib/variants';
+import type { PromotionRecord } from '@/lib/variantStore';
 import { simulateSessions, simulateV2Sessions, summarizeSessions } from '@/lib/simulation';
 import type { BehaviorSignal, BehaviorSummary, Persona } from '@/lib/simulation';
 import { computeScores } from '@/lib/scoring';
@@ -78,6 +79,12 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('A');
 
+  // Live rotation — may include promoted V2 variants overriding base copy
+  const [liveVariants, setLiveVariants] = useState<Variant[]>(baseVariants);
+  const [promotions, setPromotions] = useState<Record<string, PromotionRecord>>({});
+  const [promoting, setPromoting] = useState(false);
+  const [justPromoted, setJustPromoted] = useState<{ id: string; name: string } | null>(null);
+
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Derived active data based on current mode
@@ -104,13 +111,23 @@ export default function Dashboard() {
         setLiveScores(data.scores ?? []);
         if (phase === 'idle') setPhase('simulated');
       }
-    } catch {}
+    } catch { }
   }
 
   useEffect(() => {
     fetchLiveData();
     pollRef.current = setInterval(fetchLiveData, POLL_INTERVAL_MS);
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
+  }, []);
+
+  useEffect(() => {
+    fetch('/api/promote')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.variants) setLiveVariants(data.variants);
+        if (data.promotions) setPromotions(data.promotions);
+      })
+      .catch(() => { });
   }, []);
 
   // Switch mode and ensure phase reflects data availability
@@ -121,8 +138,8 @@ export default function Dashboard() {
     setV2Scores([]);
     const hasData =
       mode === 'live' ? hasLiveData :
-      mode === 'simulated' ? hasSimData :
-      hasLiveData || hasSimData;
+        mode === 'simulated' ? hasSimData :
+          hasLiveData || hasSimData;
     setPhase(hasData ? 'simulated' : 'idle');
   }
 
@@ -131,7 +148,7 @@ export default function Dashboard() {
     setError(null);
     setTimeout(() => {
       const allSessions: BehaviorSignal[] = [];
-      for (const v of variants) {
+      for (const v of liveVariants) {
         allSessions.push(...simulateSessions(v.id, 'transitioning', 50));
         allSessions.push(...simulateSessions(v.id, 'founding', 50));
       }
@@ -151,7 +168,7 @@ export default function Dashboard() {
       const res = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scores: activeScores, variants, behaviorSummary: activeSummaries }),
+        body: JSON.stringify({ scores: activeScores, variants: liveVariants, behaviorSummary: activeSummaries }),
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
@@ -201,6 +218,59 @@ export default function Dashboard() {
   const canSimulate = dataMode === 'simulated' || dataMode === 'mixed';
   const modeLabel = dataMode === 'live' ? 'real visitors' : dataMode === 'mixed' ? 'real + simulated visitors' : 'simulated visitors';
 
+  // The weakest non-winning variant is the one V2 replaces — reallocating
+  // traffic away from what's underperforming, like a multi-armed bandit.
+  function computeWeakestVariantId(): string | null {
+    const candidates = liveVariants.filter(
+      (v) => v.id !== winnerTransitioningId && v.id !== winnerFoundingId
+    );
+    let weakestId: string | null = null;
+    let weakestAvg = Infinity;
+    for (const v of candidates) {
+      const scoresForV = activeScores.filter((s) => s.variantId === v.id);
+      if (scoresForV.length === 0) continue;
+      const avg = scoresForV.reduce((sum, s) => sum + s.compositeScore, 0) / scoresForV.length;
+      if (avg < weakestAvg) {
+        weakestAvg = avg;
+        weakestId = v.id;
+      }
+    }
+    return weakestId;
+  }
+
+  async function promoteV2() {
+    if (!analysis) return;
+    const weakestId = computeWeakestVariantId();
+    if (!weakestId) return;
+    setPromoting(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/promote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ v2Variant: analysis.v2Variant, replaceVariantId: weakestId }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      if (data.variants) setLiveVariants(data.variants);
+      if (data.record) {
+        setPromotions((prev) => ({ ...prev, [weakestId]: data.record }));
+        setJustPromoted({ id: weakestId, name: analysis.v2Variant.name });
+      }
+    } catch {
+      setError('Promotion failed. Please try again.');
+    } finally {
+      setPromoting(false);
+    }
+  }
+
+  async function resetPromotions() {
+    await fetch('/api/promote', { method: 'DELETE' });
+    setPromotions({});
+    setLiveVariants(baseVariants);
+    setJustPromoted(null);
+  }
+
   return (
     <div className="min-h-screen bg-[#080b11] text-white">
       <header className="border-b border-white/10 bg-[#080b11]/80 backdrop-blur sticky top-0 z-10">
@@ -230,8 +300,8 @@ export default function Dashboard() {
 
       <main className="mx-auto max-w-7xl px-6 py-8">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-white">Five pages. One winner. Then a better one.</h1>
-          <p className="mt-1.5 max-w-xl text-sm text-white/35">
+          <h1 className="text-2xl font-bold text-white">Which story lands? Let the data decide.</h1>
+          <p className="mt-1.5 text-sm text-white/35">
             Real visitors land on one of five variants at{' '}
             <a href="/" className="underline underline-offset-2 hover:text-white/50">framedrift.dev</a>.
             {' '}Their behavior is tracked here as it happens.
@@ -278,10 +348,19 @@ export default function Dashboard() {
             </span>
           )}
 
-          {sessionCount > 0 && (
-            <button onClick={clearLiveData} className="ml-auto text-xs text-white/20 hover:text-white/40 transition-colors">
-              Clear real sessions
-            </button>
+          {(Object.keys(promotions).length > 0 || sessionCount > 0) && (
+            <div className="ml-auto flex items-center gap-3">
+              {Object.keys(promotions).length > 0 && (
+                <button onClick={resetPromotions} className="text-xs text-white/20 hover:text-white/40 transition-colors">
+                  Reset promotions
+                </button>
+              )}
+              {sessionCount > 0 && (
+                <button onClick={clearLiveData} className="text-xs text-white/20 hover:text-white/40 transition-colors">
+                  Clear real sessions
+                </button>
+              )}
+            </div>
           )}
         </div>
 
@@ -312,27 +391,29 @@ export default function Dashboard() {
         {/* Variant Tabs */}
         <section className="mb-8">
           <div className="mb-3 flex gap-1.5 overflow-x-auto pb-1">
-            {variants.map((v) => (
+            {liveVariants.map((v) => (
               <button
                 key={v.id}
                 onClick={() => setActiveTab(v.id)}
-                className={`shrink-0 rounded-lg border px-3.5 py-1.5 text-sm font-medium transition-all ${
-                  activeTab === v.id ? 'border-white/20 bg-white/5 text-white/80' : 'border-white/8 text-white/30 hover:text-white/50'
-                } ${(v.id === winnerTransitioningId || v.id === winnerFoundingId) ? 'ring-1 ring-amber-500/40' : ''}`}
+                className={`shrink-0 rounded-lg border px-3.5 py-1.5 text-sm font-medium transition-all ${activeTab === v.id ? 'border-white/20 bg-white/5 text-white/80' : 'border-white/8 text-white/30 hover:text-white/50'
+                  } ${(v.id === winnerTransitioningId || v.id === winnerFoundingId) ? 'ring-1 ring-amber-500/40' : ''}`}
               >
-                <span className="mr-1 font-mono text-white/20">{v.id}</span>
                 {v.name}
                 {(v.id === winnerTransitioningId || v.id === winnerFoundingId) && (
                   <span className="ml-1.5 text-xs" style={{ color: '#c07830' }}>*</span>
+                )}
+                {promotions[v.id] && (
+                  <span className="ml-1.5 rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide" style={{ background: 'rgba(192,120,48,0.2)', color: '#d4944e' }}>
+                    promoted
+                  </span>
                 )}
               </button>
             ))}
             {phase === 'complete' && analysis && (
               <button
                 onClick={() => setActiveTab('V2')}
-                className={`shrink-0 rounded-lg border px-3.5 py-1.5 text-sm font-medium transition-all ${
-                  activeTab === 'V2' ? 'border-white/20 bg-white/5 text-white/80' : 'border-white/8 text-white/30 hover:text-white/50'
-                }`}
+                className={`shrink-0 rounded-lg border px-3.5 py-1.5 text-sm font-medium transition-all ${activeTab === 'V2' ? 'border-white/20 bg-white/5 text-white/80' : 'border-white/8 text-white/30 hover:text-white/50'
+                  }`}
               >
                 <span className="mr-1 font-mono" style={{ color: 'rgba(192,120,48,0.5)' }}>V2</span>
                 {analysis.v2Variant.name}
@@ -342,7 +423,7 @@ export default function Dashboard() {
           {activeTab === 'V2' && analysis ? (
             <LandingPageCard variant={analysis.v2Variant} isWinner={false} />
           ) : (
-            variants.filter((v) => v.id === activeTab).map((v) => (
+            liveVariants.filter((v) => v.id === activeTab).map((v) => (
               <LandingPageCard key={v.id} variant={v} isWinner={v.id === winnerTransitioningId || v.id === winnerFoundingId} />
             ))
           )}
@@ -369,7 +450,25 @@ export default function Dashboard() {
               {phase === 'analyzing' ? <><Spinner /> Asking AI...</> : 'Ask AI what won'}
             </button>
           )}
+          {phase === 'complete' && analysis && (
+            <button
+              onClick={promoteV2}
+              disabled={promoting}
+              className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-5 py-2.5 text-sm font-semibold text-emerald-400 transition-all hover:bg-emerald-500/15 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {promoting ? <><Spinner /> Promoting...</> : 'Promote V2 to live rotation'}
+            </button>
+          )}
         </section>
+
+        {justPromoted && (
+          <div className="mb-6 flex items-center justify-between rounded-lg border border-emerald-500/20 bg-emerald-500/8 px-4 py-3 text-sm text-emerald-300">
+            <span>
+              <strong>{justPromoted.name}</strong> is now live in slot {justPromoted.id}. New visitors assigned to that slot will see it from their next page load.
+            </span>
+            <button onClick={() => setJustPromoted(null)} className="ml-4 text-emerald-300/50 hover:text-emerald-300">✕</button>
+          </div>
+        )}
 
         {error && (
           <div className="mb-6 rounded-lg border border-red-500/20 bg-red-500/8 p-4 text-sm text-red-300">{error}</div>
@@ -399,7 +498,7 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {variants.map((v) => {
+                  {liveVariants.map((v) => {
                     const t = activeScores.find((s) => s.variantId === v.id && s.persona === 'transitioning');
                     const f = activeScores.find((s) => s.variantId === v.id && s.persona === 'founding');
                     const isWin = v.id === winnerTransitioningId || v.id === winnerFoundingId;
@@ -407,7 +506,7 @@ export default function Dashboard() {
                       <tr key={v.id} className={`border-b border-white/4 ${isWin ? 'bg-white/[0.02]' : ''}`}>
                         <td className="px-4 py-2.5 font-mono text-white/55">
                           {isWin && <span className="mr-1.5" style={{ color: '#c07830' }}>*</span>}
-                          V-{v.id} <span className="text-white/25">{v.name}</span>
+                          {v.name} <span className="font-mono text-[11px] text-white/20">{v.id}</span>
                         </td>
                         <td className="px-4 py-2.5 text-right text-white/55">{t?.compositeScore ?? '–'}</td>
                         <td className="px-4 py-2.5 text-right text-white/55">{f?.compositeScore ?? '–'}</td>
@@ -444,14 +543,14 @@ export default function Dashboard() {
         {phase === 'complete' && analysis && (
           <>
             <section className="mb-8">
-              <WinnerPanel winnerByPersona={analysis.winnerByPersona} keyInsights={analysis.keyInsights} variants={variants} />
+              <WinnerPanel winnerByPersona={analysis.winnerByPersona} keyInsights={analysis.keyInsights} variants={liveVariants} />
             </section>
             <section className="mb-8">
               <V2Panel
                 v2Variant={analysis.v2Variant}
                 v2Rationale={analysis.v2Rationale}
-                winnerTransitioning={variants.find((v) => v.id === winnerTransitioningId)}
-                winnerFounding={variants.find((v) => v.id === winnerFoundingId)}
+                winnerTransitioning={liveVariants.find((v) => v.id === winnerTransitioningId)}
+                winnerFounding={liveVariants.find((v) => v.id === winnerFoundingId)}
                 v2TransScore={v2TransScore}
                 v2FoundScore={v2FoundScore}
                 bestTransScore={bestTransScore}
@@ -487,13 +586,12 @@ function ModeButton({ label, active, disabled, disabledHint, color, onClick }: M
     <button
       onClick={disabled ? undefined : onClick}
       title={disabled ? disabledHint : undefined}
-      className={`relative rounded-md px-4 py-1.5 text-xs font-medium transition-all select-none ${
-        active
+      className={`relative rounded-md px-4 py-1.5 text-xs font-medium transition-all select-none ${active
           ? activeStyles[color]
           : disabled
-          ? 'cursor-not-allowed text-white/15'
-          : 'text-white/35 hover:text-white/55'
-      }`}
+            ? 'cursor-not-allowed text-white/15'
+            : 'text-white/35 hover:text-white/55'
+        }`}
     >
       {label}
       {disabled && (

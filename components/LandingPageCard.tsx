@@ -60,7 +60,7 @@ function LayoutA({ variant }: { variant: Variant }) {
         <div className="mb-4 inline-block rounded-full border border-white/8 bg-white/4 px-3 py-1 text-xs text-white/35">
           {personaLabel[variant.targetPersona]}
         </div>
-        <h1 className="mb-4 max-w-lg text-3xl font-bold leading-tight tracking-tight text-white">
+        <h1 className="mb-4 max-w-lg text-3xl font-bold leading-tight tracking-tight text-white font-display">
           {variant.headline}
         </h1>
         <p className="mb-7 max-w-md text-base leading-relaxed text-white/45">{variant.subheadline}</p>
@@ -125,7 +125,7 @@ function LayoutB({ variant }: { variant: Variant }) {
         <div className="mb-3 inline-block rounded-full border border-white/8 bg-white/4 px-3 py-1 text-xs text-white/35">
           {personaLabel[variant.targetPersona]}
         </div>
-        <h1 className="mb-4 max-w-lg text-3xl font-bold leading-tight tracking-tight text-white">
+        <h1 className="mb-4 max-w-lg text-3xl font-bold leading-tight tracking-tight text-white font-display">
           {variant.headline}
         </h1>
         <p className="mb-7 max-w-md text-base leading-relaxed text-white/45">{variant.subheadline}</p>
@@ -166,7 +166,7 @@ function LayoutC({ variant }: { variant: Variant }) {
         <div className="mb-4 inline-block rounded-full border border-white/8 bg-white/4 px-3 py-1 text-xs text-white/35">
           {personaLabel[variant.targetPersona]}
         </div>
-        <h1 className="mb-4 max-w-xl text-3xl font-bold leading-tight tracking-tight text-white">
+        <h1 className="mb-4 max-w-xl text-3xl font-bold leading-tight tracking-tight text-white font-display">
           {variant.headline}
         </h1>
         <p className="mb-7 max-w-lg text-base leading-relaxed text-white/45">{variant.subheadline}</p>
@@ -224,7 +224,7 @@ function LayoutD({ variant }: { variant: Variant }) {
         <div className="mb-4 inline-block rounded-full border border-white/8 bg-white/4 px-3 py-1 text-xs text-white/35">
           {personaLabel[variant.targetPersona]}
         </div>
-        <h1 className="mb-4 max-w-xl text-3xl font-bold leading-tight tracking-tight text-white">
+        <h1 className="mb-4 max-w-xl text-3xl font-bold leading-tight tracking-tight text-white font-display">
           {variant.headline}
         </h1>
         <p className="mb-7 max-w-lg text-base leading-relaxed text-white/45">{variant.subheadline}</p>
@@ -288,7 +288,7 @@ function LayoutE({ variant }: { variant: Variant }) {
         <div className="mb-4 inline-block rounded-full border border-white/8 bg-white/4 px-3 py-1 text-xs text-white/35">
           {personaLabel[variant.targetPersona]}
         </div>
-        <h1 className="mb-4 max-w-xl text-3xl font-bold leading-tight tracking-tight text-white">
+        <h1 className="mb-4 max-w-xl text-3xl font-bold leading-tight tracking-tight text-white font-display">
           {variant.headline}
         </h1>
         <p className="mb-7 max-w-lg text-base leading-relaxed text-white/45">{variant.subheadline}</p>

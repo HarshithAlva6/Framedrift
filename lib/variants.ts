@@ -12,8 +12,8 @@ export type Variant = {
 export const variants: Variant[] = [
   {
     id: 'A',
-    name: 'Pain-First',
-    angle: 'The broken CI nightmare',
+    name: 'The Broken Build',
+    angle: 'Broken CI nightmare',
     headline: "You didn't break it. Something upstream did.",
     subheadline:
       "FrameDrift keeps an eye on your AI stack and tells you what broke before your CI does.",
@@ -27,7 +27,7 @@ export const variants: Variant[] = [
   },
   {
     id: 'B',
-    name: 'Speed-First',
+    name: 'Ship Without Drama',
     angle: 'Ship faster',
     headline: 'Stop losing days to upstream surprises.',
     subheadline:
@@ -42,7 +42,7 @@ export const variants: Variant[] = [
   },
   {
     id: 'C',
-    name: 'Learning-First',
+    name: 'Keep Up, Not Burn Out',
     angle: 'For engineers moving into AI',
     headline: 'The AI stack keeps changing. Keep up without burning out.',
     subheadline:
@@ -57,7 +57,7 @@ export const variants: Variant[] = [
   },
   {
     id: 'D',
-    name: 'Intelligence-First',
+    name: 'Knows What It Means',
     angle: 'Not just alerts, actual reasoning',
     headline: 'Dependabot tells you what changed. FrameDrift tells you what it means.',
     subheadline:
@@ -72,7 +72,7 @@ export const variants: Variant[] = [
   },
   {
     id: 'E',
-    name: 'Ecosystem-First',
+    name: 'Watches the Whole Stack',
     angle: 'The whole AI stack, tracked',
     headline: 'No team can keep up with the AI ecosystem. FrameDrift can.',
     subheadline:
